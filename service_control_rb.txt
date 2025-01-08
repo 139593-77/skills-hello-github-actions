@@ -1,0 +1,91 @@
+# Filename: service_control.rb
+
+# Read the Action and ServiceName from the node attributes
+action = node['service_control']['Action']
+service_name = node['service_control']['ServiceName']
+
+# Perform IIS Reset if ServiceName is IIS
+if service_name == 'IIS'
+  execute 'reset_iis' do
+    command 'iisreset'
+    action :run
+    not_if 'iisreset /status'  # Prevents running if IIS is already in a good state
+  end
+else
+  # For other services, check if the action is 'Start' or 'Stop'
+  case action
+  when 'Start'
+    # Start the service only if it is not already running
+    windows_service service_name do
+      action :start
+      not_if { ::Win32::Service.status(service_name).current_state == 'running' }
+    end
+  when 'Stop'
+    # Stop the service only if it is not already stopped
+    windows_service service_name do
+      action :stop
+      not_if { ::Win32::Service.status(service_name).current_state == 'stopped' }
+    end
+  else
+    raise "Unknown action: #{action}. It must be 'Start' or 'Stop'."
+  end
+end
+Explanation:
+Reading JSON Data:
+
+The Action and ServiceName values are read from the Chef node's attributes.
+
+In this case, we assume the attributes are stored like this:
+
+json
+Copy code
+{
+  "service_control": {
+    "Action": "Start",
+    "ServiceName": "w3svc"
+  }
+}
+Handling IIS Reset:
+
+If the ServiceName is IIS, the execute resource is used to run iisreset.
+The not_if guard prevents the command from running if IIS is already in a good state.
+Handling Other Services:
+
+For other services (if ServiceName is not IIS), the script checks if the action is to either Start or Stop the service.
+For Start: The windows_service resource checks if the service is already running using ::Win32::Service.status(service_name).current_state == 'running'. If the service is not running, it will start it.
+For Stop: Similarly, it checks if the service is already stopped using ::Win32::Service.status(service_name).current_state == 'stopped'. If the service is not stopped, it will stop it.
+Error Handling:
+
+If the Action is not recognized (i.e., neither Start nor Stop), an error is raised.
+Notes:
+Win32::Service: The ::Win32::Service module from Ruby can be used to check the current status of a Windows service. If this is not available by default, you may need to install the win32-service gem on the node where you're running the recipe.
+
+To ensure win32-service is available, add it to your metadata.rb or install it via the chef_gem resource:
+
+ruby
+Copy code
+chef_gem 'win32-service' do
+  action :install
+end
+JSON Input: The node['service_control'] attributes should be provided either as part of your Chef environment, role, or data bag. You can also pass them directly to the node in your Chef run.
+
+Example JSON Input:
+json
+Copy code
+{
+  "service_control": {
+    "Action": "Start",
+    "ServiceName": "w3svc"
+  }
+}
+In this example, it will attempt to start the w3svc service if it is not already running.
+
+Running the Recipe:
+Make sure your JSON input is available as a node attribute or data bag.
+Add this recipe to your Chef run list.
+Run the Chef client to apply the recipe.
+This recipe will conditionally execute the iisreset for IIS or start/stop a Windows service based on the JSON input provided.
+
+
+
+

@@ -1,0 +1,26 @@
+# Filename: iis_and_service_control.rb
+
+# Reset IIS (Internet Information Services)
+execute 'reset_iis' do
+  command 'iisreset'
+  action :run
+  not_if 'iisreset /status'  # This prevents the command from running if IIS is already in a good state
+end
+
+# Define the service name (replace with the actual service you want to control)
+service_name = 'w3svc' # This is the default IIS service. Replace it with the service you need.
+
+# Stop the service (if desired)
+windows_service service_name do
+  action :stop
+end
+
+# Optionally, you can start the service (if required)
+windows_service service_name do
+  action :start
+end
+
+# If you want to restart the service, you can combine stop and start as follows:
+# windows_service service_name do
+#   action [:stop, :start]
+# end

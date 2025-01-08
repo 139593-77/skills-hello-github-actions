@@ -1,0 +1,133 @@
+You can achieve this conditional behavior in a **Jenkinsfile** using the **Active Choices Plugin** (which allows dynamic parameter selection) and **Pipeline Syntax**. 
+
+Here’s how you can write a **Jenkinsfile** that dynamically updates the "Service" and "Action" dropdowns based on the selected "ServerType" parameter.
+
+### Prerequisites:
+- Install the **Active Choices Plugin** in Jenkins to enable dynamic parameters.
+- Use **Active Choices Reactive Reference Parameter** to conditionally update the options in the dependent dropdowns.
+
+### Example Jenkinsfile:
+
+```groovy
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'ServerType', choices: ['WebServer', 'MiddlewareServer', 'ELKServer'], description: 'Select the Server Type')
+
+        // Service is dynamic based on ServerType
+        activeChoiceParam(name: 'Service') {
+            description('Select the Service based on Server Type')
+            filterable()
+            groovyScript {
+                script("""
+                    if (ServerType == 'WebServer') {
+                        return ['IIS']
+                    } else if (ServerType == 'MiddlewareServer') {
+                        return ['JBOSS', 'ActiveMQ']
+                    } else if (ServerType == 'ELKServer') {
+                        return ['ELKService']
+                    } else {
+                        return []
+                    }
+                """)
+                fallbackScript("return []")
+            }
+        }
+
+        // Action is dynamic based on ServerType
+        activeChoiceParam(name: 'Action') {
+            description('Select the Action based on Service Type')
+            filterable()
+            groovyScript {
+                script("""
+                    if (ServerType == 'WebServer') {
+                        return ['Reset']
+                    } else if (ServerType == 'MiddlewareServer') {
+                        return ['Start', 'Stop']
+                    } else if (ServerType == 'ELKServer') {
+                        return ['Start', 'Stop']
+                    } else {
+                        return []
+                    }
+                """)
+                fallbackScript("return []")
+            }
+        }
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    echo "Server Type: ${params.ServerType}"
+                    echo "Selected Service: ${params.Service}"
+                    echo "Action: ${params.Action}"
+
+                    // Example logic based on the selected parameters
+                    if (params.ServerType == 'WebServer' && params.Service == 'IIS' && params.Action == 'Reset') {
+                        echo 'Performing IIS reset...'
+                        // Add your code to reset IIS here
+                    } else if (params.ServerType == 'MiddlewareServer') {
+                        if (params.Service == 'JBOSS' && params.Action == 'Start') {
+                            echo 'Starting JBOSS...'
+                            // Add your code to start JBOSS here
+                        } else if (params.Service == 'ActiveMQ' && params.Action == 'Start') {
+                            echo 'Starting ActiveMQ...'
+                            // Add your code to start ActiveMQ here
+                        } else if (params.Service == 'JBOSS' && params.Action == 'Stop') {
+                            echo 'Stopping JBOSS...'
+                            // Add your code to stop JBOSS here
+                        } else if (params.Service == 'ActiveMQ' && params.Action == 'Stop') {
+                            echo 'Stopping ActiveMQ...'
+                            // Add your code to stop ActiveMQ here
+                        }
+                    } else if (params.ServerType == 'ELKServer' && params.Service == 'ELKService') {
+                        if (params.Action == 'Start') {
+                            echo 'Starting ELKService...'
+                            // Add your code to start ELKService here
+                        } else if (params.Action == 'Stop') {
+                            echo 'Stopping ELKService...'
+                            // Add your code to stop ELKService here
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+### Breakdown of the Jenkinsfile:
+
+1. **Parameters**:
+   - The `ServerType` parameter is a simple `choice` parameter with the values `"WebServer"`, `"MiddlewareServer"`, and `"ELKServer"`.
+   - The `Service` and `Action` parameters are **Active Choice parameters** that depend on the value of `ServerType`. The choices for `Service` and `Action` are dynamically determined using **Groovy scripts**.
+
+2. **Active Choices Parameters**:
+   - **Service**: The available options depend on the `ServerType`:
+     - If `ServerType` is `WebServer`, the only available service is `IIS`.
+     - If `ServerType` is `MiddlewareServer`, the available services are `JBOSS` and `ActiveMQ`.
+     - If `ServerType` is `ELKServer`, the only available service is `ELKService`.
+   - **Action**: The available options depend on the `ServerType`:
+     - If `ServerType` is `WebServer`, the only available action is `Reset`.
+     - If `ServerType` is `MiddlewareServer`, the available actions are `Start` and `Stop`.
+     - If `ServerType` is `ELKServer`, the available actions are `Start` and `Stop`.
+
+3. **Groovy Scripts**:
+   - The `groovyScript` defines logic to return options based on the selected `ServerType`. The script checks the value of `ServerType` and dynamically adjusts the available choices for both `Service` and `Action`.
+
+4. **Stage**:
+   - In the `Build` stage, the parameters are used to decide what actions to perform based on the user input.
+   - The script echoes the values selected for `ServerType`, `Service`, and `Action`, and you can replace the `echo` statements with actual commands to manage services as required.
+
+### How It Works:
+1. When the user triggers the Jenkins pipeline, the first dropdown (`ServerType`) will appear, allowing the user to select one of the three server types.
+2. Based on the selected `ServerType`, the `Service` dropdown dynamically updates with relevant services.
+3. Similarly, the `Action` dropdown updates based on the `ServerType` to show the appropriate actions (such as `Start`, `Stop`, or `Reset`).
+4. The Jenkins pipeline executes based on the selected values for `ServerType`, `Service`, and `Action`, and you can add the necessary logic for managing the selected services.
+
+### Requirements:
+- Ensure that the **Active Choices Plugin** is installed in Jenkins for this to work.
+- You can further extend the Jenkinsfile to perform more actions based on these parameters.
+
+This dynamic parameter setup in Jenkins allows you to conditionally configure and execute the right actions based on user input, making your Jenkins pipeline more flexible and user-friendly.
