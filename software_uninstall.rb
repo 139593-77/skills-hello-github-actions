@@ -7,13 +7,13 @@
 require 'win32/registry'
 software_name = 'R for Windows 4.4.1'
 registry_path = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
+uninstall_string = nil
 
 # Fetch the UninstallString from the registry
 ruby_block "Fetch UninstallString for #{software_name}" do
   block do
     
     uninstall_string = nil
-
     ::Win32::Registry::HKEY_LOCAL_MACHINE.open(registry_path) do |reg|
       reg.each_key do |key, _wtime|
         k = reg.open(key)
@@ -32,4 +32,10 @@ ruby_block "Fetch UninstallString for #{software_name}" do
     end
   end
   action :run
+end
+
+execute "Run Uninstallation of #{software_name}" do
+  
+  command lazy { "#{uninstall_string}" }
+
 end
