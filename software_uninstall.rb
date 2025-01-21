@@ -1,32 +1,35 @@
-# Run the 'where' command to find the path of a software (e.g., 'python')
-command = 'where /R "C:\Program Files\R" unins*.exe'
+# Cookbook:: my_cookbook
+# Recipe:: fetch_uninstall_string
+# Description:: This recipe fetches the UninstallString from the registry for a specific software
 
-# Use the shell_out method to execute the command and capture the output
-output = shell_out(command).stdout.strip
+# Define the software name and registry path
 
-# Log the output to verify the result
-log 'command_output' do
-  message "The output of the 'where' command is: #{output}"
-  level :info
+require 'win32/registry'
+software_name = 'R for Windows 4.4.1'
+registry_path = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
+
+# Fetch the UninstallString from the registry
+ruby_block "Fetch UninstallString for #{software_name}" do
+  block do
+    
+    uninstall_string = nil
+
+    ::Win32::Registry::HKEY_LOCAL_MACHINE.open(registry_path) do |reg|
+      reg.each_key do |key, _wtime|
+        k = reg.open(key)
+        display_name = k['DisplayName'] rescue nil
+        if display_name == software_name
+          uninstall_string = k['QuietUninstallString'] rescue nil
+          break
+        end
+      end
+    end
+
+    if uninstall_string
+      Chef::Log.info("UninstallString for #{software_name}: #{uninstall_string}")
+    else
+      Chef::Log.warn("UninstallString for #{software_name} not found.")
+    end
+  end
+  action :run
 end
-
-# Example check: if the command output is non-empty, do something
-if output.empty?
-  log 'command_not_found' do
-    message "'where uninst.exe' returned no result. R is not installed."
-    level :warn
-  end
-else
-  log 'command_found' do
-    message "'where uninst.exe' found at: #{output}"
-    level :info
-  end
-end
-
-windows_package 'R' do
-    action :remove
-    installer_type :exe
-    source output
-    options '/S' # Silent uninstall option, modify as needed
-  end
-  
