@@ -42,7 +42,7 @@ properties([
             ]
         ],
        [$class: 'CascadeChoiceParameter', 
-            choiceType: 'PT_SINGLE_SELECT', 
+            choiceType: 'PT_MULTI_SELECT', 
             description: 'Select the Hostname from the Dropdown List', 
             name: 'Host_Name',
             referencedParameters: 'ServerType,Env_Name',
