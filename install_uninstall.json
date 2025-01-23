@@ -1,0 +1,90 @@
+  {"wbg_a0041a_rtce": {
+        "artifactory": {
+            "repo": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/"
+        },
+        "current_package_version": "0.1.10",
+        "appid": "A0041A",
+        "pipeline_type": "install_uninstall",
+        "install_uninstall": {
+            "targetDrive": "E:",
+            "local_base_path": "E:/",
+            "local_devops_path": "E:/devops",
+            "local_devops_artifacts_path": "E:/devops/artifacts",
+            "local_devops_powershell_scripts_path": "E:/devops/powershell_scripts",
+            "local_devops_sql_scripts_path": "E:/devops/sql_scripts",
+            "local_devops_windows_softwares_path": "E:/devops/windows_softwares",
+            "installDir": "E:\Program Files",
+            "source_artifactory_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Attributes/install_uninstall.json",
+            "local_json_file_download_path": "E:/devops/artifacts/install_uninstall.json",
+            "json_file_name": "install_uninstall.json",
+            "ps_file_list": [],
+            "ps_sw": [],
+            "windows_softwares_list": ["AAStudio"],
+            "rPackage_list": [""],
+            "AAStudio": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/AA_Studio.zip",
+                "package_name": "AdaptivAnalytics.msi",
+                "package_type": "msi",
+                "options_list": "ADDLOCAL=ALL AA_LICENSE_PATH=\"E:\\devops\\windows_softwares\\AAStudio\\license-Westpac Banking Corporation 1.xml\" COPYANALYTICSFILE=\"1\" COPYANALYTICSFILE=\"1\" ARTIQSTOREPATH=\"\" /qn INSTALLLOCATION=\"E:/Program Files/FIS/Adaptive Analytics 201/\" /lx E:/devops/AAStudioInstall_log.txt",
+                "uninstall_name": "Adaptive Analytics"
+            },
+            "MDT": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/MDT.msi",
+                "package_name": "MDT.msi",
+                "package_type": "msi",
+                "options_list": "INSTLOC_ADAPTIV=\"E:/Program Files/FIS/Adaptive Analytics 201/MDT\" ADDLOCAL=\"MDT,AAPLUGIN\" /L*V E:/devops/MDT-Install.log /qn",
+                "uninstall_name": "Adaptiv Market Data Toolkit"
+            },
+            "R": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/R-4.4.1-win.exe",
+                "package_name": "R-4.4.1-win.exe",
+                "package_type": "exe",
+                "options_list": "/SILENT /DIR=\"E:/Program Files/R-4.4.1\"",
+                "uninstall_name": "R"
+            },
+            "RStudio": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/RStudio-2024.09.0-375.exe",
+                "package_name": "RStudio-2024.09.0-375.exe",
+                "package_type": "exe",
+                "options_list": "/S /D=\"E:/Program Files/RStudio\"",
+                "uninstall_name": "RStudio"
+            },
+            "RTools": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/rtools44-6104-6039.exe",
+                "package_name": "rtools44-6104-6039.exe",
+                "package_type": "exe",
+                "options_list": "/S /D=\"E:/Program Files/RTools\"",
+                "uninstall_name": "RTools"
+            },
+            "digest": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/digest_0.6.37.zip",
+                "package_name": "digest_0.6.37.zip",
+                "package_type": "zip",
+                "options_list": "CMD INSTALL "
+            },
+            "fs": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/fs_1.6.4.zip",
+                "package_name": "fs_1.6.4.zip",
+                "package_type": "exe",
+                "options_list": "CMD INSTALL "
+            },
+            "RODBC": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/RODBC_1.3-23.zip",
+                "package_name": "RODBC_1.3-23.zip",
+                "package_type": "zip",
+                "options_list": "CMD INSTALL "
+            },
+            "zoo": {
+                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A0041A_RTCE/Softwares/zoo_1.8-12.zip",
+                "package_name": "zoo_1.8-12.zip",
+                "package_type": "zip",
+                "options_list": "CMD INSTALL "
+            }
+        },
+        "services_start_stop": {},
+        "sql_deployment": {},
+        "sqlserver_install": {},
+        "database_refresh": {},
+        "windows_pipeline": {}
+    }
+}
