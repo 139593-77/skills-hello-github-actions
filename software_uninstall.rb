@@ -34,8 +34,22 @@ ruby_block "Fetch UninstallString for #{software_name}" do
   action :run
 end
 
+uninstall_string = "\"C:\\Program Files\\R\\R-4.4.1\\unins000.exe\" /SILENT & rmdir /S /Q C:\\Mangesh\\tcs\\Chef\\cookbooks\\test2"
+# uninstall_string = "dir /L . & ipconfig /all"
+
+# Define the variable
+my_command = "echo Hello, Chef!"
+
+# Use the variable in the execute resource
+execute 'run_custom_command' do
+  command my_command
+  action :run
+end
+
+
 execute "Run Uninstallation of #{software_name}" do
   
-  command lazy { "#{uninstall_string}" }
+  command uninstall_string
+  # command lazy { "dir /L . & ipconfig /all" }
 
 end
