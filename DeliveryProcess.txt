@@ -1,0 +1,80 @@
+While delivering any requirement to customer, please follow below delivery process in order to adhere to standards and guidelines.
+
+High Level Stages
+
+1. Requirement Gathering
+
+2. Estimation
+
+3. Estimation Review
+
+4. Design
+
+5. Design Review
+
+6. Test Cases Preparation
+
+7. Test Cases Review
+
+8. Coding
+
+9. Code Review
+
+10. Testing
+
+11. Testing Review
+
+12. Demo
+
+13. Documentation
+
+Requiqrement Gathering
+
+Use the existing requirement gathering form () to collect all your requirements
+ -- Separete Confl page capturing all details
+ -- It may have all ref emails for later ref
+ --- Get it signed off from requester with consolidate requirements in email
+ 
+ Estimation 
+ --- Send detailed estimates plan to requester
+ 
+ Design 
+ -- ref pattern should be given  if its existing
+ -- in case of new pattern preapre new design digaram 
+ -- attach SBD document
+ -- SBD ID with status
+ 
+ Design Review
+ -- Internal review
+ -- Westpac SME review may be required case to case basis
+ 
+ Test Cases Preparation
+ --- Identify all test scnarioes including all boundary conditions
+ --- Internal Review
+ --- Get it signed off from requester
+ 
+ Coding
+ -- Consider test cases as inputs to your code
+ -- Follow existing pattern if any and reusable components
+ -- Try to generalize your code if possible
+ -- Try to use copilot as accelerator to your coding, validate before use.
+ -- Use exiting copilot prompts if its suitable
+ -- Whatever new prompts that you are using try to document it
+ -- Whenever possible test your code locally before giving for review
+ -- Follow best practices and coding standards (EDO Chef standards)
+ 
+ Code Review
+ 
+ -- Self Review
+ -- Peer Review
+ 
+ Tetsing
+ 
+ Testing Review
+ 
+ Demo
+ 
+ Overall Status for reporting
+
+
+Should have templates for each section 
