@@ -28,53 +28,73 @@ High Level Stages
 
 13. Documentation
 
+SHould have templates for each section 
+
 Requiqrement Gathering
-
-Use the existing requirement gathering form () to collect all your requirements
- -- Separete Confl page capturing all details
- -- It may have all ref emails for later ref
- --- Get it signed off from requester with consolidate requirements in email
- 
- Estimation 
- --- Send detailed estimates plan to requester
- 
- Design 
- -- ref pattern should be given  if its existing
- -- in case of new pattern preapre new design digaram 
- -- attach SBD document
- -- SBD ID with status
- 
- Design Review
- -- Internal review
- -- Westpac SME review may be required case to case basis
- 
- Test Cases Preparation
- --- Identify all test scnarioes including all boundary conditions
- --- Internal Review
- --- Get it signed off from requester
- 
- Coding
- -- Consider test cases as inputs to your code
- -- Follow existing pattern if any and reusable components
- -- Try to generalize your code if possible
- -- Try to use copilot as accelerator to your coding, validate before use.
- -- Use exiting copilot prompts if its suitable
- -- Whatever new prompts that you are using try to document it
- -- Whenever possible test your code locally before giving for review
- -- Follow best practices and coding standards (EDO Chef standards)
- 
- Code Review
- 
- -- Self Review
- -- Peer Review
- 
- Tetsing
- 
- Testing Review
- 
- Demo
- 
- Overall Status for reporting
-
-
-Should have templates for each section 
+ -- Use the existing req gathering form
+ -- Separete Confl page capturing all details
+ -- It may have all ref emails for later ref
+ --- Get it signed off from requester with consolidate requirements in email
+ 
+ Estimation 
+ --- Send detailed estimates plan to requester
+ 
+ Design 
+ -- ref pattern should be given  if its existing
+ -- in case of new pattern preapre new design digaram 
+ -- attach SBD document
+ -- SBD ID with status
+ 
+ Design Review
+ -- Internal review
+ -- Westpac SME review may be required case to case basis
+ 
+ Test Cases Preparation
+ --- Identify all test scnarioes including all boundary conditions
+ --- Internal Review
+ --- Get it signed off from requester
+ 
+ Coding
+ -- Consider test cases as inputs to your code
+ -- Follow existing pattern if any and reusable components
+ -- Try to generalize your code if possible
+ -- Try to use copilot as accelerator to your coding, validate before use.
+ -- Use exiting copilot prompts if its suitable
+ -- Whatever new prompts that you are using try to document it
+ -- Whenever possible test your code locally before giving for review
+ -- Follow best practices and coding standards (EDO Chef standards)
+ 
+ Code Review
+ 
+ -- Self Review -- Need review checklist to be in place 
+ -- Peer Review
+ 
+ Tetsing
+ 
+ -- Test Cases Execution. Record results 
+ 
+ Testing Review
+ 
+ -- Review of execution of test cases 
+ 
+ Demo
+ 
+ -- Record findings of Demo (Suggestions) in confluence and in email
+ 
+ Testing Sign Off from Requester 
+ 
+ -- Get it per environment on email and document in confluence
+ 
+ Documentation 
+ 
+ --- Create User manual / Run book for handover
+ ---- Create Prod Dry Run Checklist
+ 
+ 
+ Documentation Review 
+ --- Peer Review
+ 
+ Sign Off for Prod Dry Run checklist 1 week prior to release
+ 
+ 
+ Overall Status for reporting
