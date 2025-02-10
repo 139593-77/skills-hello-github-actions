@@ -1,3 +1,9 @@
+****  Starting and Stopping ELKService on SVP multinodes at a time and in single job RUN *****
+https://devblogs.microsoft.com/scripting/powertip-use-poweshell-to-start-service-on-remote-machine/
+START Service -- Get-Service -Name bits -ComputerName RSLAPTOP01 | Set-Service -Status Running
+STOP Service -- Get-Service -Name bits -ComputerName RSLAPTOP01 | Set-Service -Status Stopped
+****  Starting and Stopping ELKService on SVP multinodes at a time and in single job RUN *****
+
 # Filename: service_control.rb
 
 # Read the Action and ServiceName from the node attributes
