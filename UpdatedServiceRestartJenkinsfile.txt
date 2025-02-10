@@ -1,0 +1,56 @@
+def scheduledParentJobNumber
+def scheduledParentJob
+def parentDownstreamJobURL
+def DATA_BAG_SECRET = "clm"
+def isSVP = "No"
+def svpServers = ""
+
+
+script{
+          if ((environment == "SVP-WSDC") || (environment == "SVP-RCC")) {
+            isSVP = "Yes"
+            svpServers = ${Host_Name}
+          }
+          // Prepare services.json
+            writeFile (file: "${WORKSPACE}/services.json" ,
+                  text: """\
+                  {"wib_devops": {
+                        "artifactory": {
+                            "repo": "https://artifactory.srv.westpac.com.au/artifactory/A009B6_WIBCLM/"
+                        },
+                        "current_package_version": "0.1.0",
+                        "appid": "A009B6",
+                        "services": {
+                            "local_base_path": "E:/",
+                            "local_devops_path": "E:/devops",
+                            "local_devops_artifacts_path": "E:/devops/artifacts",
+                            "source_artifactory_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A009B6_WIBCLM/attributes/services.json",
+                            "local_json_file_download_path": "E:/devops/artifacts/services.json",
+                            "json_file_name": "services.json",
+                            "servicename": ${Service_Name},
+                            "env_name": ${Env_Name},
+                            "action": ${Action},
+                            "isSVP": ${isSVP},
+                            "svpServers": ${svpServers},
+                            "IIS": {
+                                "service_type": "IIS",
+                                "command": "iisreset"
+                            },
+                            "ActiveMQ": {
+                                "service_type": "Windows Service"
+                            },
+                            "jbossfdim": {
+                                "service_type": "Windows Service"
+                            },
+                            "jbossEAP-7": {
+                                "service_type": "Windows Service"
+                            },
+                            "JBossEAP-7": {
+                                "service_type": "Windows Service"
+                            }
+                        }
+                    }
+                }
+             """.stripIndent()
+            )//writeFile  
+        }// script
