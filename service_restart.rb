@@ -130,9 +130,12 @@ function Format-AnsiColor {
   # Access the key-value pairs
   $service_action = $jsonObject.wib_devops.services.Action
   $json_service = $jsonObject.wib_devops.services.servicename
-  $is_svp = $jsonObject.wib_devops.services.isSVP
+  $servers = $jsonObject.wib_devops.services.Servers
   $service_type = $jsonObject.wib_devops.services.${json_service}.service_type
-  $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
+  $servers.Split(",") | ForEach-Object {
+  $server = $_
+  Write-Host "Server: $server"
+  $service = Get-Service -Name $json_service -ComputerName ${server} -ErrorAction SilentlyContinue
   Write-Host "Service Type: $service_type"
   if ($service_type -eq 'IIS') {
     iisreset
@@ -170,6 +173,7 @@ function Format-AnsiColor {
       }
     }
   }
+      }
   Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
 EOF
 
