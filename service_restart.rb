@@ -149,27 +149,27 @@ function Format-AnsiColor {
   } else {
     if ($service_action -eq "Start") {
       if ($service.Status -ne "Running") {
-        Start-Service -Name $json_service
+        Get-Service -Name $json_service -ComputerName ${server} | Set-Service -Status Running
       } else {
         Write-Host "Service $json_service is already running"
         Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
         exit
       }
-      $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
+      $service = Get-Service -Name $json_service -ComputerName ${server} -ErrorAction SilentlyContinue
       if ($service.Status -eq "Running") {
-        Write-Host "PIV::Service $json_service is running"
+        Write-Host "PIV::Service $json_service is running on ${server}"
       }
     } elseif ($service_action -eq "Stop") {
       if ($service.Status -ne "Stopped") {
-        Stop-Service -Name $json_service
+        Get-Service -Name $json_service -ComputerName ${server} | Set-Service -Status Stopped
       } else {
-        Write-Host "Service $json_service is already stopped"
+        Write-Host "Service $json_service is already stopped on ${server}"
         Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
         exit
       }
       $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
       if ($service.Status -eq "Stopped") {
-        Write-Host "PIV::Service $json_service is stopped"
+        Write-Host "PIV::Service $json_service is stopped on ${server}"
       }
     }
   }
