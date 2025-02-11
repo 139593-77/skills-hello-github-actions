@@ -2,7 +2,6 @@
 # |  Cookbook:: wbg_clm
 # |  Recipe::  service_restart
 # |  DESCRIPTION: This script can be used for restarting services on windows
-# |
 # +---------------------------------------------------------------------------------
 
 ##########################################################################
@@ -131,18 +130,19 @@ function Format-AnsiColor {
   # Access the key-value pairs
   $service_action = $jsonObject.wib_devops.services.Action
   $json_service = $jsonObject.wib_devops.services.servicename
+  $is_svp = $jsonObject.wib_devops.services.isSVP
   $service_type = $jsonObject.wib_devops.services.${json_service}.service_type
   $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
   Write-Host "Service Type: $service_type"
   if ($service_type -eq 'IIS') {
     iisreset
-	  iisreset /status
+    iisreset /status
     Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-	  exit
+    exit
   } elseif ($service.Length -eq 0) {
-      Write-Host "Service does not exist"
-      Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-	  exit
+    Write-Host "Service does not exist"
+    Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
+    exit
   } else {
     if ($service_action -eq "Start") {
       if ($service.Status -ne "Running") {
@@ -150,27 +150,28 @@ function Format-AnsiColor {
       } else {
         Write-Host "Service $json_service is already running"
         Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-		exit
+        exit
       }
-	  $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
+      $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
       if ($service.Status -eq "Running") {
         Write-Host "PIV::Service $json_service is running"
       }
-	} elseif ($service_action -eq "Stop") {
-	    if ($service.Status -ne "Stopped") {
-          Stop-Service -Name $json_service
+    } elseif ($service_action -eq "Stop") {
+      if ($service.Status -ne "Stopped") {
+        Stop-Service -Name $json_service
       } else {
         Write-Host "Service $json_service is already stopped"
         Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-		exit
+        exit
       }
-	  $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
+      $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
       if ($service.Status -eq "Stopped") {
         Write-Host "PIV::Service $json_service is stopped"
       }
-	}
+    }
   }
   Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-  EOF
+EOF
+
 service_stop_start_action_status = powershell_out(service_start_or_stop_action).stdout.chomp()
 Chef::Log.info("Services action status in timeout loop-- #{service_stop_start_action_status}")
