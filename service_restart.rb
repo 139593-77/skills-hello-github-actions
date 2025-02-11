@@ -119,7 +119,9 @@ function Format-AnsiColor {
   }
   Format-AnsiColor -Message 'Hey there' -Style Bold -ForegroundColor Red
   # Define the path to the JSON file
-  $jsonFilePath = "C:\\cookbooks\\services.json"
+  $jsonFilePath = "C:\\Mangesh\\TCS\\Chef\\cookbooks\\services.json"
+  $isAlreadyStarted = "No"
+  $isAlreadyStopped = "No"
 
   # Read the JSON file content
   $jsonContent = Get-Content -Path $jsonFilePath -Raw
@@ -131,6 +133,8 @@ function Format-AnsiColor {
   $service_action = $jsonObject.wib_devops.services.Action
   $json_service = $jsonObject.wib_devops.services.servicename
   $servers = $jsonObject.wib_devops.services.Servers
+  $isSVP = $jsonObject.wib_devops.services.isSVP
+  Write-Host "IS SVP::$isSVP"
   $service_type = $jsonObject.wib_devops.services.${json_service}.service_type
   $servers.Split(",") | ForEach-Object {
   $server = $_
@@ -152,24 +156,30 @@ function Format-AnsiColor {
         Get-Service -Name $json_service -ComputerName ${server} | Set-Service -Status Running
       } else {
         Write-Host "Service $json_service is already running"
-        Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-        exit
+        #Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
+        $isAlreadyStarted = "Yes"
+        #exit
       }
-      $service = Get-Service -Name $json_service -ComputerName ${server} -ErrorAction SilentlyContinue
-      if ($service.Status -eq "Running") {
-        Write-Host "PIV::Service $json_service is running on ${server}"
+      if ($isAlreadyStarted -eq "No") {
+        $service = Get-Service -Name $json_service -ComputerName ${server} -ErrorAction SilentlyContinue
+        if ($service.Status -eq "Running") {
+          Write-Host "PIV::Service $json_service is running on ${server}"
+        }
       }
     } elseif ($service_action -eq "Stop") {
       if ($service.Status -ne "Stopped") {
         Get-Service -Name $json_service -ComputerName ${server} | Set-Service -Status Stopped
       } else {
         Write-Host "Service $json_service is already stopped on ${server}"
-        Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
-        exit
+        #Format-AnsiColor -Message 'Hey there' -Style 'normal display' -ForegroundColor Black
+        $isAlreadyStopped = "Yes"
+        #exit
       }
-      $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
-      if ($service.Status -eq "Stopped") {
-        Write-Host "PIV::Service $json_service is stopped on ${server}"
+      if ($isAlreadyStopped -eq "No") {
+        $service = Get-Service -Name $json_service -ErrorAction SilentlyContinue
+        if ($service.Status -eq "Stopped") {
+          Write-Host "PIV::Service $json_service is stopped on ${server}"
+        }
       }
     }
   }
