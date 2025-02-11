@@ -1,0 +1,37 @@
+{"wib_devops": {
+    "artifactory": {
+        "repo": "https://artifactory.srv.westpac.com.au/artifactory/A009B6_WIBCLM/"
+    },
+    "current_package_version": "0.1.0",
+    "appid": "A009B6",
+    "services": {
+        "local_base_path": "E:/",
+        "local_devops_path": "E:/devops",
+        "local_devops_artifacts_path": "E:/devops/artifacts",
+        "source_artifactory_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A009B6_WIBCLM/attributes/services.json",
+        "local_json_file_download_path": "E:/devops/artifacts/services.json",
+        "json_file_name": "services.json",
+        "servicename": "AdobeARMservice",
+        "env_name": "DEV",
+        "action": "Start",
+        "isSVP": "Yes",
+        "Servers": "localhost,localhost,localhost",
+        "IIS": {
+            "service_type": "IIS",
+            "command": "iisreset"
+        },
+        "ActiveMQ": {
+            "service_type": "Windows Service"
+        },
+        "jbossfdim": {
+            "service_type": "Windows Service"
+        },
+        "jbossEAP-7": {
+            "service_type": "Windows Service"
+        },
+        "AdobeARMservice": {
+            "service_type": "Windows Service"
+        }
+    }
+}
+}
