@@ -1,0 +1,30 @@
+import groovy.json.JsonSlurper
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Print Workspace Path') {
+
+            steps {
+                script {
+                echo "Current workspace path: ${env.WORKSPACE}"
+                echo "ENV NAME::${env.Env_Name}"
+                /*var content = readFile 'parameters.txt'
+                echo "CONTENT::${content}"*/
+                def jobObj = build job: 'test1'
+                echo "TEST1 RESULT::${jobObj.result}"
+                if (jobObj.result == 'SUCCESS') {
+                        echo "Starting job test2 now"
+                        build job: 'test2'
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
+}
