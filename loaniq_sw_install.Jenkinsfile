@@ -176,9 +176,9 @@ def msgFlatten(def list, def msgs) {
    return  list
 }
 
-def triggerJob(policyName, appServer, json){
+def triggerJob(encryptedKey, policyName, appServer, json){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-software_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: 'HG8nqMzghjEnRYgzwQqYVBOREWKALnnFNZW+OHNqQdQ3L7SceUI6r+Ox6EuC0dbOsJ81j7Diw8qmUUJwtDLPgDZqUA5CQ+rxV2XCSAaNgftidWwCQr8YY/L1yVRugRPHaLrsAS6+HwTElmN2yHYNeJn0KzoWQgvBqJmLnNmFmevqRmbf2qvX9ZloZpnH2fTlE+dY8zgr0w39Je8bHjg2uCH6x+dsbLRcDq4cmZ5gF6Cj3RlIz0gm0EjyCRTNkl67Za3y3f+XZUChB9xn2u18ztOLCc1asP8mZDzV93wQaqy/SVoszMa7U+KnFSzpRgySe+bvxr3V1dFTiAyG23CLWlsz+mY1znaO/JdKqInHrUWB2xgRF+hQXJfpc3CtFGmD/8Sl9xQ7kPelaj1YnRhq19AeLlTOfnWn88IyyYnNoG35IXEK29CEcxxgjW1JofKAF1AmidBtGYmcgceVxquYN7PSWqAdczD/TrpMyi8Sebiu/Ypmp5t6sdkTlVJRavqsyMCx1NfE/H5ISVQZRzEDlaetFSyTFn0RpmTvWx0abX0jnoF3HtanfuC/GjVLSP9qKF0fTo6gT/9XbcYu0hjYkX1p+xj08VfQaBPuIREY7lsvFm4p97vqipvSjO2giSBmHzDyMjFqKIvnT2Xx2/I4K56Siw0ip/qaTJqLPj23iPE='), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'install_uninstall.json')]
+  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-software_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'install_uninstall.json')]
   
 }
 
@@ -188,15 +188,15 @@ def mqtriggerJob(policyName, appServer, namedrunlist){
   
 }
 
-def envsetuptriggerJob(policyName, appServer){
+def envsetuptriggerJob(encryptedKey, policyName, appServer){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-environment_variables_setup'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: 'HG8nqMzghjEnRYgzwQqYVBOREWKALnnFNZW+OHNqQdQ3L7SceUI6r+Ox6EuC0dbOsJ81j7Diw8qmUUJwtDLPgDZqUA5CQ+rxV2XCSAaNgftidWwCQr8YY/L1yVRugRPHaLrsAS6+HwTElmN2yHYNeJn0KzoWQgvBqJmLnNmFmevqRmbf2qvX9ZloZpnH2fTlE+dY8zgr0w39Je8bHjg2uCH6x+dsbLRcDq4cmZ5gF6Cj3RlIz0gm0EjyCRTNkl67Za3y3f+XZUChB9xn2u18ztOLCc1asP8mZDzV93wQaqy/SVoszMa7U+KnFSzpRgySe+bvxr3V1dFTiAyG23CLWlsz+mY1znaO/JdKqInHrUWB2xgRF+hQXJfpc3CtFGmD/8Sl9xQ7kPelaj1YnRhq19AeLlTOfnWn88IyyYnNoG35IXEK29CEcxxgjW1JofKAF1AmidBtGYmcgceVxquYN7PSWqAdczD/TrpMyi8Sebiu/Ypmp5t6sdkTlVJRavqsyMCx1NfE/H5ISVQZRzEDlaetFSyTFn0RpmTvWx0abX0jnoF3HtanfuC/GjVLSP9qKF0fTo6gT/9XbcYu0hjYkX1p+xj08VfQaBPuIREY7lsvFm4p97vqipvSjO2giSBmHzDyMjFqKIvnT2Xx2/I4K56Siw0ip/qaTJqLPj23iPE='), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
+  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-environment_variables_setup'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
   
 }
 
-def wallettriggerJob(policyName, appServer){
+def wallettriggerJob(encryptedKey, policyName, appServer){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-certificate_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: 'HG8nqMzghjEnRYgzwQqYVBOREWKALnnFNZW+OHNqQdQ3L7SceUI6r+Ox6EuC0dbOsJ81j7Diw8qmUUJwtDLPgDZqUA5CQ+rxV2XCSAaNgftidWwCQr8YY/L1yVRugRPHaLrsAS6+HwTElmN2yHYNeJn0KzoWQgvBqJmLnNmFmevqRmbf2qvX9ZloZpnH2fTlE+dY8zgr0w39Je8bHjg2uCH6x+dsbLRcDq4cmZ5gF6Cj3RlIz0gm0EjyCRTNkl67Za3y3f+XZUChB9xn2u18ztOLCc1asP8mZDzV93wQaqy/SVoszMa7U+KnFSzpRgySe+bvxr3V1dFTiAyG23CLWlsz+mY1znaO/JdKqInHrUWB2xgRF+hQXJfpc3CtFGmD/8Sl9xQ7kPelaj1YnRhq19AeLlTOfnWn88IyyYnNoG35IXEK29CEcxxgjW1JofKAF1AmidBtGYmcgceVxquYN7PSWqAdczD/TrpMyi8Sebiu/Ypmp5t6sdkTlVJRavqsyMCx1NfE/H5ISVQZRzEDlaetFSyTFn0RpmTvWx0abX0jnoF3HtanfuC/GjVLSP9qKF0fTo6gT/9XbcYu0hjYkX1p+xj08VfQaBPuIREY7lsvFm4p97vqipvSjO2giSBmHzDyMjFqKIvnT2Xx2/I4K56Siw0ip/qaTJqLPj23iPE='), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
+  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-certificate_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
   
 }
 
@@ -376,20 +376,26 @@ pipeline {
           else if (software_name == 'EnvironmentVariableSetup') {
             policyName = "a001c7_Loaniq-environment_variables_setup"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
-            envsetuptriggerJob(policyName, appServer)
+            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
+              envsetuptriggerJob(enckey, policyName, appServer)
+            }
             echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A001C7_LoanIQ/job/OBM_Chef_Deployment/","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/OBM_Chef_Deployment/")
           }
           else if (software_name == 'WalletCreation') {
             policyName = "a001c7_Loaniq-certificate_install"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
-            wallettriggerJob(policyName, appServer)
+            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
+              wallettriggerJob(enckey, policyName, appServer)
+            }
             echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A001C7_LoanIQ/job/OBM_Chef_Deployment/","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/OBM_Chef_Deployment/")
           }
           else {
             policyName = "a001c7_Loaniq-software_install"
             json = "install_uninstall.json"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
-            triggerJob(policyName, appServer, json)
+            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
+              triggerJob(enckey, policyName, appServer, json)
+            }
             echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A001C7_LoanIQ/job/OBM_Chef_Deployment/","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/OBM_Chef_Deployment/")
           }
         }//Script
