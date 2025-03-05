@@ -65,7 +65,6 @@ def msgFlatten(def list, def msgs) {
 
 def triggerJob(encryptedKey, namedRunList, policyName, appServer, json){
   // -------------------------- TRIGGER THE PIPELINE  --------------------// 
-  def  data_bag_secret = "dLbNbxBhnlA4gMECDrpmJp7IFyL81QuzmnadiZkhWQVX++yqk3RUPXDMc4zsdvuMLsi4nDI4zzNnwsLNUn8s+Hla62qJvtjaxKLVoFpHBhRutFZv8xE9GWrP6+8kFT30id03NTkTHRWJYz/I7CMxs4Li4nsYLze66k71qdJEbx4=" 
   final parentJobResult =  build job: 'A004CF_RMW/OBMR/Chef_Ondemand_NonProd_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), 
     string(name: 'SERVER_LABEL', value: "${appServer}"), 
     string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), 
@@ -79,7 +78,6 @@ def triggerJob(encryptedKey, namedRunList, policyName, appServer, json){
 }
 def triggerJobWithoutJson(encryptedKey, namedRunList, policyName, appServer){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  def  data_bag_secret = "dLbNbxBhnlA4gMECDrpmJp7IFyL81QuzmnadiZkhWQVX++yqk3RUPXDMc4zsdvuMLsi4nDI4zzNnwsLNUn8s+Hla62qJvtjaxKLVoFpHBhRutFZv8xE9GWrP6+8kFT30id03NTkTHRWJYz/I7CMxs4Li4nsYLze66k71qdJEbx4="
   final parentJobResult =  build job: 'A004CF_RMW/OBMR/Chef_Ondemand_NonProd_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), 
     string(name: 'SERVER_LABEL', value: "${appServer}"), 
     string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), 
