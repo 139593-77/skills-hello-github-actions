@@ -77,7 +77,7 @@ def triggerJob(encryptedKey, namedRunList, policyName, appServer, json){
   // echo "Current Build number is ${currentBuild.number}"
   // echo "parentJobResult number: ${parentJobResult.number}"
 }
-def triggerJobWithoutJson(namedRunList, policyName, appServer){
+def triggerJobWithoutJson(encryptedKey, namedRunList, policyName, appServer){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
   def  data_bag_secret = "dLbNbxBhnlA4gMECDrpmJp7IFyL81QuzmnadiZkhWQVX++yqk3RUPXDMc4zsdvuMLsi4nDI4zzNnwsLNUn8s+Hla62qJvtjaxKLVoFpHBhRutFZv8xE9GWrP6+8kFT30id03NTkTHRWJYz/I7CMxs4Li4nsYLze66k71qdJEbx4="
   final parentJobResult =  build job: 'A004CF_RMW/OBMR/Chef_Ondemand_NonProd_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), 
@@ -85,7 +85,7 @@ def triggerJobWithoutJson(namedRunList, policyName, appServer){
     string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), 
     string(name: 'POLICY_NAME', value: "${policyName}"), 
     string(name: 'POLICY_GROUP', value: 'default'), 
-    string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${data_bag_secret}"),
+    string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"),
     string(name: 'NAMED_RUNLIST', value: "${namedRunList}")]
   // echo "Current Build number is ${currentBuild.number}"
   // echo "parentJobResult number: ${parentJobResult.number}"
@@ -243,11 +243,15 @@ pipeline {
           if(jsonRequired){
             json = "install_uninstall.json"
             echoBanner("Trigger Job","namedRunList: ${namedRunList}","policyName: ${policyName}","appServer: ${appServer}")
-            triggerJob(namedRunList, policyName, appServer, json)
+            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
+              triggerJob(enckey, namedRunList, policyName, appServer, json)
+            }
           }
           else{
             echoBanner("Trigger Job","namedRunList: ${namedRunList}","policyName: ${policyName}","appServer: ${appServer}")
-            triggerJobWithoutJson(namedRunList, policyName, appServer)
+            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
+              triggerJobWithoutJson(enckey, namedRunList, policyName, appServer)
+            }
 
           }
           echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/Chef_OnDemand_Deployment_Downstream/","Search for a004cf_installables in the left side navigation and select the job and view the console output")
