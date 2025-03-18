@@ -89,7 +89,7 @@ pipeline {
   }
 
   environment {
-		VERSION = "${currentBuild.number}"
+		VERSION = ""
 	}
 
   stages { 
@@ -115,7 +115,28 @@ pipeline {
                 //zip the project
                 sh """
                 cd ${WORKSPACE}
-                zip -rq "Batch-${currentBuild.number}.zip" *
+                environment=${Env_Name}
+                currentBuild_number=`cat .version`
+                mkdir work
+                mkdir work/config
+                cp -r scripts work/
+                    echo "Environment selected::${environment}"
+                    cp -r config/${environment}/* work/config/
+
+                cd work
+                zip -rq "../Batch-${currentBuild_number}.zip" *
+                cd ..
+                rm -rf work
+                mkdir work
+                mkdir work/config
+                cp -r scripts work/
+                echo "${environment}"
+                cp -r config/${environment}/* work/config/
+
+                cd work
+                zip -rq "../Batch-${environment}-${currentBuild_number}.zip" *
+                cd ..
+                rm -rf work
                 """
             } //script
         } //steps
