@@ -1,0 +1,195 @@
+import org.apache.commons.io.FilenameUtils
+
+def echoBanner(def ... msgs) {
+   echo createBanner(msgs)
+}
+
+def errorBanner(def ... msgs) {
+   error(createBanner(msgs))
+}
+
+// def createBanner(def ... msgs) {
+//    return """
+//        ===========================================
+
+//        ${msgFlatten(null, msgs).join("\n        ")}
+
+//        ===========================================
+//    """
+// }
+def getPattern(length, caracter) {
+  StringBuilder sb= new StringBuilder(length)
+  for (int i = 0; i < length; i++) {
+      sb.append(caracter)
+  }
+  return sb.toString()
+}
+def createBanner(def ... msgs) {
+  // msgs[0].length().toInteger()
+  spacesEqual = getPattern(msgs[0].length().toInteger(), '=')
+   return """
+       =================== ${msgs[0]} ========================
+
+       ${msgFlatten(null, msgs[1..-1]).join("\n        ")}
+
+       ====================${spacesEqual}=========================
+   """
+}
+def echoHeader(msgs){
+  echo createHeader(msgs)
+}
+def createHeader(msgs) {
+   return """
+
+       ${msgFlatten(null, msgs).join("\n        ")}
+
+   """
+}
+
+// flatten function hack included in case Jenkins security
+// is set to preclude calling Groovy flatten() static method
+// NOTE: works well on all nested collections except a Map
+def msgFlatten(def list, def msgs) {
+   list = list ?: []
+   if (!(msgs instanceof String) && !(msgs instanceof GString)) {
+       msgs.each { msg ->
+           list = msgFlatten(list, msg)
+       }
+   }
+   else {
+       list += msgs
+   }
+
+   return  list
+}
+
+def triggerJob(policyName, appServer, json){
+  // -------------------------- TRIGGER THE PIPELINE  --------------------// 
+  final parentJobResult =  build job: 'A005D4_Meerkat/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), 
+    string(name: 'SERVER_LABEL', value: "${appServer}"), 
+    string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), 
+    string(name: 'POLICY_NAME', value: "${policyName}"), 
+    string(name: 'POLICY_GROUP', value: 'default'),
+    string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: "${json}")]
+    //echo "Current Build number is ${currentBuild.number}"
+  // echo "parentJobResult number: ${parentJobResult.number}"
+}
+
+def targetDrive = "/riskdata/atoti"
+pipeline {
+  // agent any
+  agent {
+        node {
+          label 'enterprise_devops&&linux'
+        }
+      }
+  
+  parameters {
+    choice(name: 'Env_Name', choices: ['DEV','SIT','UAT'], description: 'Choose the Environment Name for deployment')
+  }
+
+  environment {
+		VERSION = "${currentBuild.number}"
+	}
+
+  stages { 
+    stage('Checkout') {
+        steps {
+            script {
+                // Get code from a BitBucket repository
+                deleteDir()
+                checkout([$class: 'GitSCM', branches: [
+                    [name: '*/master']
+                ], doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'RelativeTargetDirectory', relativeTargetDir: ""]
+                ], submoduleCfg: [], userRemoteConfigs: [
+                    [credentialsId: 'srvA005D4jenkinsSSHKey', url: "ssh://git@bitbucket.srv.westpac.com.au/a005d4/a005d4-meerkat-build.git"]
+                ]])
+            
+            } 
+        }
+    }   
+    stage('Zip the package') {
+        steps {
+            script {
+                //zip the project
+                sh """
+                cd ${WORKSPACE}
+                zip -rq "Batch-${currentBuild.number}.zip" *
+                """
+            } //script
+        } //steps
+    } //stage
+    stage('Create json file') {
+      steps {
+        script { 
+		           
+            writeFile (file: "${env.WORKSPACE}/batchpackage.json" , 
+            text: """\
+			{ 
+                "wib_devops": {
+                "pipeline_type": "batch_deploy",
+                  "batch_deploy": {
+                     "source_artifact_url_path": "https://artifactory.srv.westpac.com.au/artifactory/A005D4_Meerkat/ScenarioGenerator-Packages/",
+                     "current_package_version": "Batch-${VERSION}.zip", 
+                     "source_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A005D4_Meerkat/Attributes/scpackage.json",
+                     "json_file_download_path": "${targetDrive}/wib_devops/artifacts/scpackage.json",
+                     "source_artifact_file_loc": "${targetDrive}/wib_devops/artifacts",
+                     "json_file_name": "scpackage.json",
+                     "deploy_location": "ScenarioGenerator/",
+                     "source_artifact_extract_loc": "${targetDrive}/wib_devops/deploy_package",
+					           "artifactory_service_account": "SRVC_A005D4_0001_PRD",
+					           "vault_path": "creds",
+                     "vault_version": "1",
+					           "install_source_drive": "${targetDrive}/"
+                    } 
+                }
+            }
+              """.stripIndent()
+            )
+			  } //script
+      } //steps
+    }  //stage
+    stage("Upload Package to artifactory") {
+      steps {
+        script {
+          def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'accesscredential'
+            def uploadSpec = """{
+                    "files": [{
+                       "pattern": "${WORKSPACE}/Batch-${currentBuild.number}.zip",
+                       "target": "A005D4_Atoti/Batch-Packages/",
+                            "props": "type=zip;status=ready"
+                    },
+                    {
+                       "pattern": "${WORKSPACE}/batchpackage.json",
+                       "target": "A005D4_Atoti/Attributes/",
+                            "props": "type=json;status=ready"
+                    }]
+                 }"""
+                 server.upload(uploadSpec)
+        }//Script
+      }//Steps
+    }// Upload Package
+    stage('Deploy the package') {
+      steps {
+        script {
+          def appServer = constructTargetServer(Env_Name)
+          def policyName = "A005D4_Meerkat-batchpackage-deploy"
+          def json = "batchpackage.json"
+          triggerJob(policyName, appServer, json)
+        }
+      }
+    }
+  }//stages
+}//pipeline
+
+def constructTargetServer(choosenEnv){
+  if(choosenEnv == "DEV"){
+    appServer = "dla240906184813.obm.nix.srv.westpac.com.au"
+  }else if(choosenEnv == "SIT"){
+    appServer = "tla240910110226.obm.nix.srv.westpac.com.au"
+  }else if(choosenEnv == "UAT"){
+    appServer = ""
+  }
+  return appServer
+}
