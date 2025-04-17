@@ -1,0 +1,26 @@
+{"wbg_a005d4_atoti": {
+  "artifactory": {
+  "repo": "https://artifactory.srv.westpac.com.au/artifactory/A005D4_Atoti/"
+   },
+   "current_package_version": "Atoti_28_2025.04.17_SIT.zip",
+   "appid": "a005d4",
+   "domain": "ESTESTAU",
+   "deployment_type": "Deploy",
+   "fqdn": "ESTESTAU.WBCTESTAU.WESTPAC.COM.AU",
+   "pipeline_type": "sql_pipeline",
+   "sql_pipeline": {
+   "source_artifact_url_path": "https://artifactory.srv.westpac.com.au/artifactory/A005D4_Atoti/Atoti_28_2025.04.17_SIT.zip",
+   "source_artifact_package_file_loc": "E:/atoti_devops/Atoti_28_2025.04.17_SIT.zip",
+   "source_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A005D4_Atoti/Attributes/Atoti_28_2025.04.17_SIT.json",
+   "json_file_download_path": "E:/atoti_devops/sql_pipeline.json",
+   "db_service_account": "SRVC_A005D4_0003_SIT",
+   "deploy_directory": "/tmp/wib_devops",
+   "deployFiles": [],
+   "rollbackFiles": ["deployment/mr/ddl-scripts/atoti_mr_DROP_v1.0.sql", "deployment/signoff/ddl-scripts/atoti_signoff_DROP_v1.0.sql"],
+   "sql_release_file_path": "E:\\atoti_devops\\deploy_package\\",
+   "env_type": "sit",
+   "db_hostname": "twd240912172237.estestau.wbctestau.westpac.com.au",
+   "db_port": "1435"
+  }
+  }}
+
