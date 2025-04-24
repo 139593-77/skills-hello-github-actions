@@ -1,0 +1,8 @@
+https://stackoverflow.com/questions/36316976/list-all-buildsartifacts-in-a-repo-on-jfrog-artifactory-using-aqlartifactory
+https://jfrog.com/help/r/jfrog-artifactory-documentation/using-wildcards
+https://jfrog.com/help/r/artifactory-how-to-restore-specific-items-from-the-trash-can/sample-aql-queries
+https://jfrog.com/help/r/jfrog-rest-apis/pattern-search
+https://jfrog.com/help/r/jfrog-rest-apis/property-search
+https://jfrog.com/help/r/jfrog-rest-apis/artifact-latest-version-search-based-on-properties
+
+items.find({"name": {"$match": "myartifact-*version.jar"}}).sort({"created": "desc"}).limit(1)
