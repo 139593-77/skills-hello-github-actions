@@ -85,11 +85,11 @@ pipeline {
       }
   
   parameters {
-    choice(name: 'Env_Name', choices: ['DEV','SIT','UAT'], description: 'Choose the Environment Name for deployment')
+    choice(name: 'Env_Name', choices: ['dev','sit','uat', 'svp'], description: 'Choose the Environment Name for deployment')
   }
 
   environment {
-		json_file_name = ""
+		latest_json_name = ""
 	}
 
   stages { 
@@ -97,8 +97,15 @@ pipeline {
         steps {
             script {
                 //Put code below to call curl command to get latest version json based on environment selection
-                sh """
-                """
+                //Get latest artifactname to be deployed from maven snapshot artifactory
+           withCredentials([usernamePassword(credentialsId: 'A0032D_SA_0001_PRD_Art', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+           latest_json_name = sh (returnStdout: true,
+                    script:"""#!/bin/bash
+                      jarName=`curl -s -u"${USERNAME}":"${PASSWORD}" -XPOST https://artifactory.srv.westpac.com.au/artifactory/api/search/aql -d 'items.find({"repo":{"\$eq": "A0032D_RatesDb"}, "name": {"\$match": "rdpipeline_deploy_${Env_Name}_version_*.json"}}).sort({"\$desc" : ["created"]}).limit(1)' -H "Content-Type: text/plain" | jq .results[0].name |sed -e 's/"//g'`
+                      echo -n "\${jarName}"
+                      """
+           )   
+           }
             } //script
         } //steps
     } //stage
@@ -107,7 +114,7 @@ pipeline {
         script {
           def appServer = constructTargetServer(Env_Name)
           def policyName = "a0032d_ratesdb"
-          triggerJob(policyName, appServer, json_file_name)
+          triggerJob(policyName, appServer, latest_json_name)
         }
       }
     }
@@ -115,12 +122,14 @@ pipeline {
 }//pipeline
 
 def constructTargetServer(choosenEnv){
-  if(choosenEnv == "DEV"){
-    appServer = "dla240906184813.obm.nix.srv.westpac.com.au"
-  }else if(choosenEnv == "SIT"){
-    appServer = "tla240910110226.obm.nix.srv.westpac.com.au"
-  }else if(choosenEnv == "UAT"){
-    appServer = ""
+  if(choosenEnv == "dev"){
+    appServer = "dla210921173259.obm.nix.srv.westpac.com.au"
+  }else if(choosenEnv == "sit"){
+    appServer = "tla210923171312.obm.nix.srv.westpac.com.au"
+  }else if(choosenEnv == "uat"){
+    appServer = "tla210921173329.obm.nix.srv.westpac.com.au"
+  }else if(choosenEnv == "svp"){
+    appServer = "tla211217163038.obm.nix.srv.westpac.com.au,tla211217163459.obm.nix.srv.westpac.com.au,tla211217163702.obm.nix.srv.westpac.com.au,tla211217164104.obm.nix.srv.westpac.com.au"
   }
   return appServer
 }
