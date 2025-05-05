@@ -1,4 +1,5 @@
 
+
 import org.apache.commons.io.FilenameUtils
 
 def echoBanner(def ... msgs) {
@@ -85,6 +86,8 @@ pipeline {
       }
   
   parameters {
+    string(name: 'PACKAGE_NAME', defaultValue: '', description: 'Enter the package name. For Ex: RDPipeline_feature_MRR-22620_Rename_496.zip')
+    string(name: 'WHL_FILE', defaultValue: '', description: 'Enter the whl file name. For Ex: rdpipeline-1.3.11-py2.py3-none-any.whl')
     choice(name: 'Env_Name', choices: ['dev','sit','uat', 'svp'], description: 'Choose the Environment Name for deployment')
   }
 
@@ -93,6 +96,60 @@ pipeline {
 	}
 
   stages { 
+    stage('Input Validation Check') {
+        steps {
+            script {
+                if (!params.PACKAGE_NAME?.trim()) {
+                    echoRedBanner("Validation Errors", "Please enter the package name to append in JSON file For Ex: RDPipeline_feature_MRR-22620_Rename_496.zip")
+                    error("Invalid Input Error")
+                }
+                if (!params.WHL_FILE?.trim()) {
+                    echoRedBanner("Validation Errors", "Please enter the whl file name to append in JSON file For Ex: rdpipeline-1.3.11-py2.py3-none-any.whl")
+                    error("Invalid Input Error")
+                }
+                if (!params.PACKAGE_NAME.contains('.zip')) {
+                    echoRedBanner("Validation Errors", "Please enter the package name with .zip extension to append in JSON file For Ex: RDPipeline_feature_MRR-22620_Rename_496.zip")
+                    error("Invalid Input Error")
+                }
+                if (!params.WHL_FILE.contains('.whl')) {
+                    echoRedBanner("Validation Errors", "Please enter the whl file name with .whl extension to append in JSON file For Ex: rdpipeline-1.3.11-py2.py3-none-any.whl")
+                    error("Invalid Input Error")
+                }
+            }
+        }
+    }
+    stage('JSON Creation and Upload') {
+        steps {
+            script {
+                def jsonFilePath = "${WORKSPACE}/rdpipeline_deploy_${ENV_NAME}_version_${env.BUILD_NUMBER}.json"
+                writeFile(file: jsonFilePath, text: """\
+                {
+                    "ratesdb": {
+                        "pkg_name": "${PACKAGE_NAME}",
+                        "deploy_path": "/apps/market_data/risk_data/pipelines/batch/rdpipeline/setup",
+                        "whl_file": "${WHL_FILE}"
+                    }
+                }
+                """.stripIndent())
+
+                echo "JSON file content:"
+                echo readFile(jsonFilePath)
+
+                def server = Artifactory.newServer(url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'A0032D_SA_0001_PRD_Art')
+                def artifact_sub_path = "A0032D_RatesDb/Attributes"
+                def uploadSpec = """{
+                    "files": [{
+                        "pattern": "${jsonFilePath}",
+                        "target": "${artifact_sub_path}/",
+                        "props": "type=json;status=ready"
+                    }]
+                }"""
+                server.upload(uploadSpec)
+                echoBanner("Click the below artifactory link to verify","https://artifactory.srv.westpac.com.au/artifactory/A0032D_RatesDb/Attributes/")
+
+            }
+        }
+    }
     stage('Deployment Pre-Requisites') {
         steps {
             script {
