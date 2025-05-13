@@ -156,21 +156,21 @@ pipeline {
 	
 		stage ('maven build') {
 		    steps {
-			script{
-				def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'ArtifactoryCreds'
-				def rtMaven = Artifactory.newMavenBuild()
+                script{
+                    def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'ArtifactoryCreds'
+                    def rtMaven = Artifactory.newMavenBuild()
 
-				rtMaven.tool = '3.9.7'
-				//env.JAVA_HOME = '/data/jenkins-agent/build-tools/jdk-21.0.22'
-				rtMaven.deployer releaseRepo: 'a005d4_atoti-maven-release', snapshotRepo: 'a005d4_atoti-maven-snapshot', server: server
-				//rtMaven.resolver releaseRepo: 'a005d4_atoti-maven-release', snapshotRepo: 'a005d4_atoti-maven-snapshot', server: server
-				buildInfo = Artifactory.newBuildInfo()
-				buildInfo.env.capture = true
-				// Delete build after 10 days
-				buildInfo.retention maxBuilds: 10, deleteBuildArtifacts: true, async: true
-				rtMaven.run pom: 'Atoti/pom.xml', goals: 'clean install  $JAVA_CACERTS surefire-report:report -Dgmaven.logging=DEBUG -DskipTests -U -e  --settings .m2/settings_maven.xml -Db=' + env.BRANCH_NAME.replace('/', '_') + ' -DbuildVersion=1.0.${BUILD_NUMBER}', buildInfo: buildInfo
-			}
-	          }
+                    rtMaven.tool = '3.9.7'
+                    //env.JAVA_HOME = '/data/jenkins-agent/build-tools/jdk-21.0.22'
+                    rtMaven.deployer releaseRepo: 'a005d4_atoti-maven-release', snapshotRepo: 'a005d4_atoti-maven-snapshot', server: server
+                    //rtMaven.resolver releaseRepo: 'a005d4_atoti-maven-release', snapshotRepo: 'a005d4_atoti-maven-snapshot', server: server
+                    buildInfo = Artifactory.newBuildInfo()
+                    buildInfo.env.capture = true
+                    // Delete build after 10 days
+                    buildInfo.retention maxBuilds: 10, deleteBuildArtifacts: true, async: true
+                    rtMaven.run pom: 'Atoti/pom.xml', goals: 'clean install  $JAVA_CACERTS surefire-report:report -Dgmaven.logging=DEBUG -DskipTests -U -e  --settings .m2/settings_maven.xml -Db=' + env.BRANCH_NAME.replace('/', '_') + ' -DbuildVersion=1.0.${BUILD_NUMBER}', buildInfo: buildInfo
+                }
+	        }
 		}    
 	/*	stage('Create json file') {
          steps {
@@ -221,6 +221,78 @@ pipeline {
                }
             }
         }
+
+        stage('Zip files for fortify') {
+    	    steps {
+                /*script {
+                    def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'artifactoryCreds'
+                    def downloadSpec = """{
+                        "files": [{
+                        "pattern": "A001C7_LOANIQ_JAVA_SNAPSHOT/fortify_zip_batch/zip_package_payments.bat",
+                        "target": "${env.WORKSPACE}/tmp/"
+                    }]
+                }"""
+                server.download(downloadSpec)
+            }*/
+                sh """
+                    for i in atoti_mr atoti_mr_common atoti_mr_content atoti_signoff; do
+                        echo "zipping files for $i"
+                        mkdir -p fortifyscan/${i}/src
+                        mkdir -p fortifyscan/${i}/lib
+                        cp -R ${WORKSPACE}/Atoti/${i}/src/main ${WORKSPACE}/fortifyscan/${i}/src
+                        cp -R ${WORKSPACE}/Atoti/${i}/target/dependency/*.jar ${WORKSPACE}/fortifyscan/${i}/lib
+                        zip -rq "../Batch-${Env_Name}-${version}.zip" *
+                    done                    
+                """
+            powershell '''
+                # Define paths
+                $zipFile = "${env:WORKSPACE}\\LiqPaymentService.zip"
+                $sourcePath = "${env:WORKSPACE}\\fortifyscan\\LiqPaymentService\\*"
+                $finalZipFile = "${env:WORKSPACE}\\fortifyscan\\LiqPaymentService_${env:BUILD_NUMBER}.zip"
+
+                # Compress the directory to a ZIP file
+                Compress-Archive -Path $sourcePath -DestinationPath $zipFile -Force
+
+                # Rename the ZIP file with the build number
+                Move-Item -Path $zipFile -Destination $finalZipFile -Force
+               '''
+    		 	       }
+        }
+ stage('Upload zip in expected path') {
+    steps {
+       script {
+    	 	 		 def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'artifactoryCreds'
+                 def uploadSpec = """{
+                     "files": [{
+                       "pattern": "${env.WORKSPACE}/fortifyscan/LiqPaymentService_${env.BUILD_NUMBER}.zip",
+                       "target": "A001C7_LOANIQ/fortifyscan/LiqPaymentService_fortify/"
+                       }]
+                       }"""
+
+                       server.upload(uploadSpec)
+                  }
+        	  }
+    }
+
+
+   	stage('Trigger fortify scan job for component Payments') {
+  	  	   steps {
+  	  		  script {
+
+  	  			build job: 'A001C7_LoanIQ/A001C7_LoanIQ_Fortify', wait: true, parameters: [
+  	  			//	build job: 'https://jenkins.srv.westpac.com.au/job/A004CF_RMW/job/a004cf_rmw_fortify', wait: true, parameters: [
+  	  				string(name: 'APP_ID', value: 'A001C7_LOANIQ'),
+  	  				string(name: 'COMPONENT', value: 'Payments'),
+  	  				string(name: 'PJVERID', value: '17158'),
+  	  				string(name: 'EMAIL_ADDRESSES', value: 'sinduja.sivaraman@westpac.com.au,rutul.jhaveri@westpac.com.au,ishan.deshpande@westpac.com.au,kulal.kumar@westpac.com.au,surya.arumugam@westpac.com.au,bhargav.kumar@westpac.com.au,mohammed.sattar@westpac.com.au'),
+  	 			   string(name: 'BUILD_LABEL', value: 'A001C7-LoanIQ_Payments'),
+  	  				string(name: 'CODE_LANGUAGE', value: 'java'),
+  	  				string(name: 'BRANCH', value: 'prod'),
+  	 				string(name: 'AF_LINK', value:"https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/fortifyscan/LiqPaymentService_fortify/LiqPaymentService_${env.BUILD_NUMBER}.zip")
+  	  			]
+  	  		}
+  	 	}
+  	  }
     
     }//stages		
 	
