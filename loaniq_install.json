@@ -1,0 +1,22 @@
+
+{
+  "wbg_a001c7_loaniq": {
+    "artifactory": {
+        "repo": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/Attributes/"
+    },
+    "pipeline_type": "install_uninstall",
+    "install_uninstall": {
+        "targetDrive": "E:",
+        "local_devops_windows_softwares_path": "E:\\devops",
+        "source_artifactory_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/Attributes/7.7_install_uninstall.json",
+        "local_json_file_download_path": "E:\\devops\\7.7_install_uninstall.json",
+        "json_file_name": "7.7_install_uninstall.json",
+        "softwares_list": ["OracleClient"],
+
+      "OracleClient": {
+          "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.7/software_install_packages/OracleClient_19.0.0_X64.zip","response_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.7/software_install_packages/OracleClient_responsefiles/OracleClient_19.0.0_X64_response.rsp","response_file": "OracleClient_19.0.0_X64_response.rsp","package_name": "OracleClient_19.0.0_X64.zip","resource_type": "batch","installation_dir": "E:\\OracleClient","deinstall_path": "E:\\OracleClient\\product\\12.2.0\\client_1\\deinstall"
+      }
+
+    }
+  }
+}
