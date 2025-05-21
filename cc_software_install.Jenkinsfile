@@ -1,3 +1,4 @@
+
 import org.apache.commons.io.FilenameUtils
 
 def echoBanner(def ... msgs) {
@@ -199,6 +200,16 @@ pipeline {
                                 "package_name": "dotNetFx40_Full_setup.exe",
                                 "package_type": "exe",
                                 "options_list": "/s /INSTALLDIR=\\"C:\\\\Program Files\\\\dotNetFx40_Full_setup\\""
+                            },
+                            "OracleClient": {
+                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A004CF_SQL_SNAP/Softwares/OracleClient_19.0.0_X64.zip",
+                                "response_link": "https://artifactory.srv.westpac.com.au/artifactory/A004CF_SQL_SNAP/Softwares/OracleClient_19.0.0_X64_response.rsp",
+                                "response_file": "OracleClient_19.0.0_X64_response.rsp",
+                                "package_name": "OracleClient_19.0.0_X64.zip",
+                                "resource_type": "batch",
+                                "tnsnames_flag": "true",
+                                "installation_dir": "E:\\\\Oracle_19c",
+                                "deinstall_path": "E:\\\\Oracle_19c\\\\product\\\\19.0.0\\\\client_1\\\\deinstall"
                             }
                         },
                         "services_start_stop": {},
