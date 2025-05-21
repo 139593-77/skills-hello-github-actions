@@ -1,8 +1,8 @@
 properties([
     parameters([
-        choice(name: 'Env_Name', choices: ['DEV1', 'DEV2', 'SIT1', 'SIT2', 'UAT UI1', 'UAT UI2', 'UAT B1', 'UAT B2'], description: 'Choose the Environment Name'),
+        choice(name: 'Env_Name', choices: ['DEV1_Windows2022', 'DEV2_Windows2022', 'SIT1_Windows2022', 'SIT5_Windows2022', 'UATUI1_Windows2022', 'UATUI2_Windows2022', 'UATB1_Windows2022', 'UATB2_Windows2022','SVPB1_Windows2022','SVPB2_Windows2022','SVPB3_Windows2022','SVPB4_Windows2022','SVPU1_Windows2022','SVPU2_Windows2022','SVPU3_Windows2022','SVPU4_Windows2022'], description: 'Choose the Environment Name'),
         [$class: 'ChoiceParameter', 
-            choiceType: 'PT_SINGLE_SELECT', 
+            choiceType: 'PT_CHECKBOX', 
             description: 'Select the software from the List',  
             name: 'software',
             script: [
@@ -17,14 +17,14 @@ properties([
                     classpath: [], 
                     sandbox: true, 
                     script: 
-                        'return["7-Zip", "Control-M", "Java", "Jinja", "Markupsafe", "Notepadplus", "OracleClient", "Putty", "Python", "PyYAML", "ReflectionClient", "Tomcat", "MQClient", "EnvironmentVariableSetup", "WalletCreation"]'
+                        'return["7-Zip_24.04_X64", "Control-M_9.0.20.0_X64", "Java_21.0.3_X64", "Jinja_2-2.10-py2", "Markupsafe_0.23.tar", "Notepadplus_8.4.9_X64", "OracleClient_19.0.0_X64", "Putty_0.79_X64", "Python_3.6.3_X64", "PyYAML_3.12.tar", "ReflectionClient_7.2_X64", "Tomcat_9.0.14_X64", "Oracle-Sqldeveloper_19.1.0_X64"]'
                 ]
             ]
         ], 
         [$class: 'CascadeChoiceParameter', 
             choiceType: 'PT_SINGLE_SELECT', 
-            description: 'Select the Version from the Dropdown List', 
-            name: 'version',
+            description: 'Select the Configuration setup from the Dropdown List', 
+            name: 'Configuration_Setup',
             referencedParameters: 'software', 
             script: [
                 $class: 'GroovyScript', 
@@ -38,51 +38,13 @@ properties([
                     classpath: [], 
                     sandbox: true, 
                     script: 
-                        """ 
-                            def listVersions(softwarename){
-                              def versions = []
-                              switch(softwarename) {
-                                case "7-Zip":
-                                  versions = ["22.01_X64","24.04_X64"]
-                                  break
-                                case "Control-M":
-                                  versions = ["9.0.20.0_X64"]
-                                  break
-                                case "Java":
-                                  versions = ["11.0.6_X64","21.0.3_X64"]
-                                  break
-                                case "Jinja":
-                                  versions = ["2-2.10-py2"]
-                                  break
-                                case "Markupsafe":
-                                  versions = ["0.23.tar"]
-                                  break
-                                case "Notepadplus":
-                                  versions = ["8.4.9_X64"]
-                                  break
-                                case "OracleClient":
-                                  versions = ["12.2.0.1.0_X64"]
-                                  break
-                                case "Putty":
-                                  versions = ["0.79_X64"]
-                                  break
-                                case "Python":
-                                  versions = ["3.6.3_X64"]
-                                  break
-                                case "PyYAML":
-                                  versions = ["3.12.tar"]
-                                  break
-                                case "ReflectionClient":
-                                  versions = ["7.2_X64"]
-                                  break
-                                case "Tomcat":
-                                  versions = ["9.0.14_X64"]
-                              return versions
-                              }
-                            }
-                            def result = listVersions(software)
-                            return result
-                        """
+                        '''
+                        if (software == null || software.isEmpty()) {
+                            return ["MQClient", "EnvironmentVariableSetup", "WalletCreation"]
+                        } else {
+                            return ["None"]
+                        }
+                        '''
                 ]
             ]
         ],
@@ -90,7 +52,7 @@ properties([
             choiceType: 'PT_SINGLE_SELECT', 
             description: 'Select the RunList for MQ Client', 
             name: 'Named_RunList',
-            referencedParameters: 'software', 
+            referencedParameters: 'Configuration_Setup', 
             script: [
                 $class: 'GroovyScript', 
                 fallbackScript: [
@@ -112,7 +74,7 @@ properties([
                               return run
                               }
                             }
-                            def result = runlist(software)
+                            def result = runlist(Configuration_Setup)
                             return result
                         """
                 ]
@@ -176,9 +138,9 @@ def msgFlatten(def list, def msgs) {
    return  list
 }
 
-def triggerJob(encryptedKey, policyName, appServer, json){
+def triggerJob(policyName, appServer, DATA_BAG_SECRET, json){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-software_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'install_uninstall.json')]
+  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-software_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), password(name: 'ENCRYPTED_DATA_BAG_SECRET', description: 'Enter databag secret if using databgs', value: "${DATA_BAG_SECRET}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: '7.7_install_uninstall.json')]
   
 }
 
@@ -188,18 +150,20 @@ def mqtriggerJob(policyName, appServer, namedrunlist){
   
 }
 
-def envsetuptriggerJob(encryptedKey, policyName, appServer){
+def envsetuptriggerJob(policyName, appServer, DATA_BAG_SECRET){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-environment_variables_setup'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
+  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-environment_variables_setup'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), password(name: 'ENCRYPTED_DATA_BAG_SECRET', description: 'Enter databag secret if using databgs', value: "${DATA_BAG_SECRET}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
   
 }
 
-def wallettriggerJob(encryptedKey, policyName, appServer){
+def wallettriggerJob(policyName, appServer, DATA_BAG_SECRET){
   // -------------------------- TRIGGER THE PIPELINE  --------------------//  
-  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-certificate_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), string(name: 'ENCRYPTED_DATA_BAG_SECRET', value: "${encryptedKey}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
+  build job: 'A001C7_LoanIQ/OBM_Chef_Deployment', parameters: [string(name: 'HOSTING_ENV', value: 'on-premise'), string(name: 'POLICY_NAME', value: 'a001c7_Loaniq-certificate_install'), string(name: 'SERVER_LABEL', value: "${appServer}"), string(name: 'POLICY_REPO', value: 'EntChef_Prod_Policy'), string(name: 'POLICY_GROUP', value: 'default'), password(name: 'ENCRYPTED_DATA_BAG_SECRET', description: 'Enter databag secret if using databgs', value: "${DATA_BAG_SECRET}"), string(name: 'NAMED_RUNLIST', value: 'none'), string(name: 'OVERRIDE_ATTRIBUTES_FILE', value: 'none')]
   
 }
 
+def targetDrive = "E:"
+def artifactory_packages_folder = "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.7/software_install_packages"
 
 pipeline {
   // agent any
@@ -207,13 +171,15 @@ pipeline {
         node {
           label 'enterprise_devops&&windows'
         }
-      }
-
+  }
+  environment {
+    DATA_BAG_SECRET = credentials('EncryptionKey')
+  }
   stages {    
     stage("Pre-requisties Setup") {
       steps {
         script {
-          software_name = "${software}"
+          software_name = "${Configuration_Setup}"
           if (software_name == 'EnvironmentVariableSetup') {
             // Prepare environment_variables.json
             writeFile (file: "${WORKSPACE}/a001c7_environment_variables.json" ,
@@ -224,10 +190,10 @@ pipeline {
                       "JAVA_HOME": "E:\\\\Java",
                       "LOANIQ_DBNAME": "LIQ_${Env_Name}_SSL",
                       "MAN_JAVA_HOME": "E:\\\\Java",
-                      "Path": "E:\\\\Java\\\\bin;E:\\\\OracleClient\\\\product\\\\12.2.0\\\\client_1\\\\bin;E:\\\\Apps\\\\Attachmate\\\\Rsecure\\\\;E:\\\\LoanIQ\\\\intfc\\\\services;E:\\\\LoanIQ\\\\intfc\\\\bin\\\\ICIS-DR;E:\\\\LoanIQ\\\\python;E:\\\\LoanIQ\\\\python\\\\Scripts;C:\\\\opscode\\\\chef\\\\bin\\\\;",
+                      "Path": "E:\\\\Java\\\\bin;E:\\\\OracleClient\\\\product\\\\19.0.0\\\\client_1\\\\bin;E:\\\\Apps\\\\Attachmate\\\\Rsecure\\\\;E:\\\\LoanIQ\\\\intfc\\\\services;E:\\\\LoanIQ\\\\intfc\\\\bin\\\\ICIS-DR;E:\\\\LoanIQ\\\\python;E:\\\\LoanIQ\\\\python\\\\Scripts;C:\\\\opscode\\\\chef\\\\bin\\\\;",
                       "WBC_DATA": "E:\\\\Data",
                       "WBC_LOANIQ": "E:\\\\LoanIQ",
-                      "ORACLE_HOME": "E:\\\\OracleClient\\\\product\\\\12.2.0\\\\client_1",
+                      "ORACLE_HOME": "E:\\\\OracleClient\\\\product\\\\19.0.0\\\\client_1",
                       "wbg_environment": "${Env_Name}"
                     }
                   }
@@ -246,117 +212,153 @@ pipeline {
             server.upload(uploadSpec)
           }//if
           else {
-            software_version_name = "${software}_${version}"
-            echoBanner("Software to be Installed","Software Name : ${software_version_name}","Environment Name : ${Env_Name}")
-            // Json update
-            windows_softwares_list = ["${software}"]
-            List softwareList = windows_softwares_list.collect{ '"' + it + '"'}
-            // Prepare install_uninstall.json
-            writeFile (file: "${WORKSPACE}/install_uninstall.json" ,
-                  text: """\
-                  {"wbg_a001c7_loaniq": {
-                        "artifactory": {
-                            "repo": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/Attributes/"
-                        },
-                        "pipeline_type": "install_uninstall",
-                        "install_uninstall": {
-                            "local_devops_windows_softwares_path": "C:\\\\temp",
-                            "source_artifactory_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/Attributes/install_uninstall.json",
-                            "local_json_file_download_path": "C:\\\\temp\\\\install_uninstall.json",
-                            "json_file_name": "install_uninstall.json",
-                            "softwares_list": "${software}",
-                            "7-Zip": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.exe",
-                                "package_name": "${software_version_name}.exe",
-                                "package_type": "exe",
-                                "resource_type": "windows_package",
-                                "options_list": "/S /D=\\"E:\\\\Program Files\\\\7-Zip\\""
-                            },
-                            "Java": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.exe",
-                                "package_name": "${software_version_name}.exe",
-                                "package_type": "exe",
-                                "resource_type": "windows_package",
-                                "options_list": "/s INSTALLDIR=\\"E:\\\\Java\\""
-                            },
-                            "Jinja": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.py3-none-any.whl",
-                                "package_name": "${software_version_name}.py3-none-any.whl",
-                                "resource_type": "python",
-                                "command": "E:\\\\LoanIQ\\\\python\\\\python -m pip install ${software_version_name}.py3-none-any.whl -f ./ --no-index"
-                            },
-                            "Markupsafe": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.gz",
-                                "package_name": "${software_version_name}.gz",
-                                "resource_type": "python",
-                                "command": "E:\\\\LoanIQ\\\\python\\\\python -m pip install ${software_version_name}.gz"
-                            },
-                            "Notepadplus": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.exe",
-                                "package_name": "${software_version_name}.exe",
-                                "package_type": "exe",
-                                "resource_type": "windows_package",
-                                "options_list": "/S /D=\\"E:\\\\Program Files\\\\Notepad++\\""
-                            },
-                            "OracleClient": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.zip",
-                                "response_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/oracle_client.rsp",
-                                "response_file": "oracle_client.rsp",
-                                "package_name": "${software_version_name}.zip",
-                                "resource_type": "batch",
-                                "installation_dir": "E:\\\\OracleClient"
-                            },
-                            "Putty": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.msi",
-                                "package_name": "${software_version_name}.msi",
-                                "package_type": "msi",
-                                "resource_type": "windows_package",
-                                "options_list": "INSTALLDIR=\\"E:\\\\Program Files\\\\Putty\\" /qn /L*V C:\\\\temp\\\\Putty.log"
-                            },
-                            "Python": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.exe",
-                                "package_name": "${software_version_name}.exe",
-                                "package_type": "exe",
-                                "resource_type": "windows_package",
-                                "options_list": "/quiet InstallAllUsers=1 PrependPath=1 TargetDir=E:\\\\LoanIQ\\\\python"
-                            },
-                            "PyYAML": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.gz",
-                                "package_name": "${software_version_name}.gz",
-                                "resource_type": "python",
-                                "command": "E:\\\\LoanIQ\\\\python\\\\python -m pip install ${software_version_name}.gz -f ./ --no-index"
-                            },
-                            "ReflectionClient": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.zip",
-                                "patch_art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/p724254.zip",
-                                "package_name": "rsshc720.msi",
-                                "patch_package_name": "P724254.msp",
-                                "resource_type": "batch",
-                                "options_list": "/quiet INSTALLDIR=\\"E:\\\\Apps\\\\Attachmate\\\\RSecure\\" ALLUSERS=1 REBOOT=ReallySuppress /l*v C:\\\\Temp\\\\Client.log /qn",
-                                "patch_options_list": "/quiet /norestart"
-                            },
-                            "Tomcat": {
-                                "art_link": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/install-packages/7.5/software_install_packages/${software_version_name}.zip",
-                                "package_name": "${software_version_name}.zip",
-                                "resources_type": "zip",
-                                "options_list": ""
-                            }
-                        }
-                    }
+            def softwareConfigMap = [
+                "7-Zip": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.exe",
+                    "package_name": "\${software_version_name}.exe",
+                    "package_type": "exe",
+                    "resource_type": "windows_package",
+                    "options_list": "/S /D=\\\"${targetDrive}\\\\Program Files\\\\7-Zip\\\""
+                ],
+                "Java": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.exe",
+                    "package_name": "\${software_version_name}.exe",
+                    "package_type": "exe",
+                    "resource_type": "windows_package",
+                    "options_list": "/s INSTALLDIR=\\\"${targetDrive}\\\\Java\\\""
+                ],
+                "Jinja": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.py3-none-any.whl",
+                    "package_name": "\${software_version_name}.py3-none-any.whl",
+                    "resource_type": "python",
+                    "command": "${targetDrive}\\\\LoanIQ\\\\python\\\\python -m pip install \${software_version_name}.py3-none-any.whl -f ./ --no-index"
+                ],
+                "Markupsafe": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.gz",
+                    "package_name": "\${software_version_name}.gz",
+                    "resource_type": "python",
+                    "command": "${targetDrive}\\\\LoanIQ\\\\python\\\\python -m pip install \${software_version_name}.gz"
+                ],
+                "Notepadplus": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.exe",
+                    "package_name": "\${software_version_name}.exe",
+                    "package_type": "exe",
+                    "resource_type": "windows_package",
+                    "options_list": "/S /D=\\\"${targetDrive}\\\\Program Files\\\\Notepad++\\\""
+                ],
+                "OracleClient": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.zip",
+                    "response_link": "${artifactory_packages_folder}/OracleClient_responsefiles/\${software_version_name}_response.rsp",
+                    "response_file": "\${software_version_name}_response.rsp",
+                    "package_name": "\${software_version_name}.zip",
+                    "resource_type": "batch",
+                    "installation_dir": "${targetDrive}\\\\OracleClient",
+                    "deinstall_path": "${targetDrive}\\\\OracleClient\\\\product\\\\12.2.0\\\\client_1\\\\deinstall"
+                ],
+                "Putty": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.msi",
+                    "package_name": "\${software_version_name}.msi",
+                    "package_type": "msi",
+                    "resource_type": "windows_package",
+                    "options_list": "INSTALLDIR=\\\"${targetDrive}\\\\Program Files\\\\Putty\\\" /qn /L*V ${targetDrive}\\\\devops\\\\Putty.log"
+                ],
+                "Python": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.exe",
+                    "package_name": "\${software_version_name}.exe",
+                    "package_type": "exe",
+                    "resource_type": "windows_package",
+                    "options_list": "/quiet InstallAllUsers=1 PrependPath=1 TargetDir=${targetDrive}\\\\LoanIQ\\\\python"
+                ],
+                "PyYAML": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.gz",
+                    "package_name": "\${software_version_name}.gz",
+                    "resource_type": "python",
+                    "command": "${targetDrive}\\\\LoanIQ\\\\python\\\\python -m pip install \${software_version_name}.gz -f ./ --no-index"
+                ],
+                "ReflectionClient": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.zip",
+                    "patch_art_link": "${artifactory_packages_folder}/p724254.zip",
+                    "package_name": "rsshc720.msi",
+                    "patch_package_name": "P724254.msp",
+                    "resource_type": "batch",
+                    "options_list": "/quiet INSTALLDIR=\\\"${targetDrive}\\\\Apps\\\\Attachmate\\\\RSecure\\\" ALLUSERS=1 REBOOT=ReallySuppress /l*v ${targetDrive}\\\\devops\\\\Client.log /qn",
+                    "patch_options_list": "/quiet /norestart"
+                ],
+                "Oracle-Sqldeveloper": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.zip",
+                    "package_name": "\${software_version_name}.zip",
+                    "resources_type": "zip",
+                    "Install_dir": "${targetDrive}\\\\OracleClient\\\\product\\\\19.0.0\\\\client_1\\\\\${software_version_name}"
+                ],
+                "Tomcat": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.zip",
+                    "package_name": "\${software_version_name}.zip",
+                    "resources_type": "zip",
+                    "options_list": ""
+                ],
+                "Control-M": [
+                    "art_link": "${artifactory_packages_folder}/\${software_version_name}.zip",
+                    "package_name": "\${software_version_name}.zip",
+                    "resources_type": "zip",
+                    "options_list": ""
+                ]
+            ]
+            windows_softwares_list = software.split(',')
+            List softwareList = windows_softwares_list.collect { it.trim() }
+            def selectedSoftware = softwareList
+
+            // Generate softwareJsonEntries
+            def softwareJsonEntries = selectedSoftware.collect { software ->
+                def softwareName = software.split('_')[0]
+                def softwareVersionName = software
+                def config = softwareConfigMap[softwareName]
+                if (config) {
+                  def configEntries = config.collect { key, value ->
+                      "\"${key}\": \"${value.replaceAll('\\$\\{software_version_name\\}', softwareVersionName)}\""
+                  }.join(',')
+                  return """
+                  "${softwareName}": {
+                      ${configEntries}
+                  }
+                  """
                 }
-                """.stripIndent()
-               )//writeFile
-               // Push to artifactory
-               def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'ArtifactoryCreds'
-               def artifact_sub_path = "A001C7_LOANIQ"
-               def uploadSpec = """{
-                       "files": [{
-                          "pattern": "${WORKSPACE}/install_uninstall.json",
+                return ""
+            }.join(',')
+            
+            def onlysoftwarenames = selectedSoftware.collect { software ->
+                "\"${software.toString().split('_')[0]}\""
+            }
+            def jsonContent = """
+            {
+              "wbg_a001c7_loaniq": {
+                "artifactory": {
+                    "repo": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/Attributes/"
+                },
+                "pipeline_type": "install_uninstall",
+                "install_uninstall": {
+                    "targetDrive": "${targetDrive}",
+                    "local_devops_windows_softwares_path": "${targetDrive}\\\\devops",
+                    "source_artifactory_json_file_loc": "https://artifactory.srv.westpac.com.au/artifactory/A001C7_LOANIQ/Attributes/7.7_install_uninstall.json",
+                    "local_json_file_download_path": "${targetDrive}\\\\devops\\\\7.7_install_uninstall.json",
+                    "json_file_name": "7.7_install_uninstall.json",
+                    "softwares_list": [${onlysoftwarenames.join(',')}],
+                    ${softwareJsonEntries}
+                }
+              }
+            }
+            """.stripIndent()
+            writeFile(file: "${WORKSPACE}/7.7_install_uninstall.json", text: jsonContent)
+            // Push to artifactory
+            def server = Artifactory.newServer url: 'https://artifactory.srv.westpac.com.au/artifactory/', credentialsId: 'ArtifactoryCreds'
+            def artifact_sub_path = "A001C7_LOANIQ"
+            def uploadSpec = """{
+                      "files": [{
+                          "pattern": "${WORKSPACE}/7.7_install_uninstall.json",
                           "target": "${artifact_sub_path}/Attributes/",
                           "props": "type=json;status=ready"
-                        }]
-              }"""
-              server.upload(uploadSpec)
+                      }]
+            }"""
+            server.upload(uploadSpec)
           }//else
         }//script
       }//steps
@@ -365,7 +367,7 @@ pipeline {
       steps {
         script {
           appServer = constructTargetServer(Env_Name)
-          software_name = "${software}"
+          software_name = "${Configuration_Setup}"
           if(software_name == 'MQClient') {
             policyName = "a001c7_mq_master_mqclient_windows"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
@@ -376,26 +378,20 @@ pipeline {
           else if (software_name == 'EnvironmentVariableSetup') {
             policyName = "a001c7_Loaniq-environment_variables_setup"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
-            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
-              envsetuptriggerJob(enckey, policyName, appServer)
-            }
+            envsetuptriggerJob(policyName, appServer, DATA_BAG_SECRET)
             echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A001C7_LoanIQ/job/OBM_Chef_Deployment/","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/OBM_Chef_Deployment/")
           }
           else if (software_name == 'WalletCreation') {
             policyName = "a001c7_Loaniq-certificate_install"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
-            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
-              wallettriggerJob(enckey, policyName, appServer)
-            }
+            wallettriggerJob(policyName, appServer, DATA_BAG_SECRET)
             echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A001C7_LoanIQ/job/OBM_Chef_Deployment/","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/OBM_Chef_Deployment/")
           }
           else {
             policyName = "a001c7_Loaniq-software_install"
-            json = "install_uninstall.json"
+            json = "7.7_install_uninstall.json"
             echoBanner("Trigger Job","policyName: ${policyName}","appServer: ${appServer}")
-            withCredentials([string(credentialsId: 'enckey', variable: 'enckey')]) {
-              triggerJob(enckey, policyName, appServer, json)
-            }
+            triggerJob(policyName, appServer, DATA_BAG_SECRET, json)
             echoBanner("   Triggered Downstream pipeline - Please verify the logs at below  ","https://jenkins.srv.westpac.com.au/job/A001C7_LoanIQ/job/OBM_Chef_Deployment/","https://jenkins.srv.westpac.com.au/job/A00619_EntDevOps/job/OBM/job/OBM_Chef_Deployment/")
           }
         }//Script
@@ -405,22 +401,38 @@ pipeline {
 }//pipeline
 
 def constructTargetServer(choosenEnv){
-  if(choosenEnv == "DEV1"){
+  if(choosenEnv == "DEV1_Windows2022"){
     appServer = "dwa240627153059.esdevau.wbcdevau.westpac.com.au"
-  }else if(choosenEnv == "DEV2"){
+  }else if(choosenEnv == "DEV2_Windows2022"){
     appServer = "dwa240627153106.esdevau.wbcdevau.westpac.com.au"
-  }else if(choosenEnv == "SIT1"){
+  }else if(choosenEnv == "SIT1_Windows2022"){
     appServer = "twa240912135957.estestau.wbctestau.westpac.com.au"
-  }else if(choosenEnv == "SIT2"){
+  }else if(choosenEnv == "SIT5_Windows2022"){
     appServer = "twa240912140002.estestau.wbctestau.westpac.com.au"
-  }else if(choosenEnv == "UAT UI1"){
+  }else if(choosenEnv == "UATUI1_Windows2022"){
     appServer = "twa250108080551.estestau.wbctestau.westpac.com.au"
-  }else if(choosenEnv == "UAT UI2"){
+  }else if(choosenEnv == "UATUI2_Windows2022"){
     appServer = "twa250107153807.estestau.wbctestau.westpac.com.au"
-  }else if(choosenEnv == "UAT B1"){
+  }else if(choosenEnv == "UATB1_Windows2022"){
     appServer = "twa250108080451.estestau.wbctestau.westpac.com.au"
-  }else if(choosenEnv == "UAT B2"){
+  }else if(choosenEnv == "UATB2_Windows2022"){
     appServer = "twa250107153812.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPB1_Windows2022"){
+    appServer = "twa250304112123.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPB2_Windows2022"){
+    appServer = "twa250304112144.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPU1_Windows2022"){
+    appServer = "twa250304112139.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPU2_Windows2022"){
+    appServer = "twa250304112134.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPB3_Windows2022"){
+    appServer = "twa250304112129.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPB4_Windows2022"){
+    appServer = "twa250304112132.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPU3_Windows2022"){
+    appServer = "twa250304112138.estestau.wbctestau.westpac.com.au"
+  }else if(choosenEnv == "SVPU4_Windows2022"){
+    appServer = "twa250304112121.estestau.wbctestau.westpac.com.au"
   }
   return appServer
 }
