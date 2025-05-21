@@ -101,6 +101,7 @@ end
 # +---------------------------------------------------------------------------------
 
 log_in_dark_blue("local_devops_path -- #{install_uninstall['local_devops_path']}")
+devops_path = "#{install_uninstall['local_devops_path']}"
 log_in_dark_blue("local_devops_windows_softwares_path -- #{install_uninstall['local_devops_windows_softwares_path']}")
 
 # Creation of folders (devops, devops/powershell_scripts, devops/windows_softwares)
@@ -226,8 +227,10 @@ install_uninstall['windows_softwares_list'].each do |software|
     end
 
     Chef::Log.info('--------------- Installing Oracle Client -----------------')
-    software_path = "#{install_uninstall['local_devops_windows_softwares_path']}" + "\\#{installpipeline["#{software}"]['response_file']}"
+    software_path = "#{install_uninstall['local_devops_windows_softwares_path']}" + "\\#{install_uninstall["#{software}"]['response_file']}"
+    software_link = "#{install_uninstall["#{software}"]['art_link']}"
     response_file_link = "#{install_uninstall["#{software}"]['response_link']}"
+    tnasnames_flag = "#{install_uninstall["#{software}"]['tnsnames_flag']}"
     # Downloading response file
     remote_file "#{software_path}" do
       source "#{response_file_link}"
@@ -269,9 +272,14 @@ install_uninstall['windows_softwares_list'].each do |software|
     batch 'Install oracle client' do
       cwd "#{archive_dest}" + '\\package\\client'
       timeout 900
-      #code ".\\setup.exe setup -silent -nowait -ignoreSysPrereqs -ignorePrereq -waitForCompletion -force -responseFile #{software_path}"
+      #code ".\\setup.exe -silent -nowait -ignoreSysPrereqs -ignorePrereq -waitForCompletion -force -responseFile #{software_path}"
       code ".\\setup.exe setup -silent -nowait -nowelcome -noconfig -nowait -responseFile #{software_path}"
     end
     Chef::Log.info('--------------- Successfully Installed Oracle Client -----------------')
+
+    # Start for TNSNAMES config if corresponding flag is true
+    if tnasnames_flag == 'true'
+      # code for copying tnsnames.ora to oracle client directory
+    end
   end
 end
