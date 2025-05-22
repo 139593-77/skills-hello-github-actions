@@ -200,6 +200,38 @@ install_uninstall['windows_softwares_list'].each do |software|
     log_in_dark_blue("Installed Software -- #{software}")
   end
 
+  # For ODAC Driver installation
+  next unless software == 'ODACDriver'
+    software_link = "#{install_uninstall["#{software}"]['art_link']}"
+    Chef::Log.info("Art link for ODACDriver::#{software_link}")
+    software_path = "#{install_uninstall['local_devops_windows_softwares_path']}" + "\\#{install_uninstall["#{software}"]['package_name']}"
+    # Downloading zip file
+    remote_file "#{software_path}" do
+      source "#{software_link}"
+      action :create_if_missing
+      headers(
+          'Authorization' => "Bearer #{var_identitytoken}"
+        )
+      sensitive true
+    end
+
+    archive_dest = "#{devops_path}" + "\\#{software}"
+    zipfile_name = "#{archive_dest}" + "\\#{install_uninstall["#{software}"]['package_name']}"
+    # Expand odac installable archive
+    archive_file 'ODAC zip' do
+      path "#{zipfile_name}"
+      destination "#{archive_dest}" + '\\package'
+    end
+    # Run the install.bat file to install ODAC Driver
+    batch 'Install ODAC Driver' do
+      cwd "#{install_uninstall["#{software}"]['deinstall_path']}"
+      code <<-EOH
+        echo y | deinstall.bat
+      EOH
+      action :run
+    end
+  end 
+
   # For Oracle Client Installation
   next unless software == 'OracleClient'
     Chef::Log.info('--------------- Checking if Oracle Client is already installed -----------------')
@@ -281,5 +313,5 @@ install_uninstall['windows_softwares_list'].each do |software|
     if tnasnames_flag == 'true'
       # code for copying tnsnames.ora to oracle client directory
     end
-  end
+  end # next unless end
 end
