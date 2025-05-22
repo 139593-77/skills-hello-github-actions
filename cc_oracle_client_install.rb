@@ -201,7 +201,7 @@ install_uninstall['windows_softwares_list'].each do |software|
   end
 
   # For Oracle Client Installation
-  if software == 'OracleClient'
+  next unless software == 'OracleClient'
     Chef::Log.info('--------------- Checking if Oracle Client is already installed -----------------')
     oracle_base = "#{install_uninstall["#{software}"]['installation_dir']}"
     deinstall_path = "#{install_uninstall["#{software}"]['deinstall_path']}" + '\\deinstall.bat'
@@ -272,7 +272,7 @@ install_uninstall['windows_softwares_list'].each do |software|
     batch 'Install oracle client' do
       cwd "#{archive_dest}" + '\\package\\client'
       timeout 900
-      #code ".\\setup.exe -silent -nowait -ignoreSysPrereqs -ignorePrereq -waitForCompletion -force -responseFile #{software_path}"
+      # code ".\\setup.exe -silent -nowait -ignoreSysPrereqs -ignorePrereq -waitForCompletion -force -responseFile #{software_path}"
       code ".\\setup.exe setup -silent -nowait -nowelcome -noconfig -nowait -responseFile #{software_path}"
     end
     Chef::Log.info('--------------- Successfully Installed Oracle Client -----------------')
